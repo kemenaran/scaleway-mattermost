@@ -20,9 +20,19 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -q update \
  && apt-get -y -q upgrade \
  && apt-get install -y -q \
+      nginx-full \
+      supervisor \
+      postfix \
  && apt-get clean
 
-## Patch rootfs
+# Install mattermost
+RUN cd /root/ \
+ && wget https://github.com/mattermost/platform/releases/download/v2.1.0/mattermost.tar.gz \
+ && tar -xvzf mattermost.tar.gz \
+ && rm -fr mattermost.tar.gz \
+ && mkdir -p /mattermost/data
+
+# Patch rootfs
 COPY ./overlay /
 
 # Add mattermost installation script

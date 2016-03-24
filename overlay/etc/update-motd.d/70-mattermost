@@ -1,6 +1,11 @@
 #!/bin/bash
 
+if [ ! -f /root/mattermost/done ]
+then
+cat <<EOF
+We are installing mattermost, you can follow installation with the command below:
 
-cat << EOF
-Mattermost
+$> tail -f /var/log/mattermost.log
+
 EOF
+fi
