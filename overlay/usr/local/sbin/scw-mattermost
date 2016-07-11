@@ -8,9 +8,9 @@ then
     exit 0
 fi
 
-/etc/init.d/supervisor force-stop
-/etc/init.d/supervisor stop
-lsof -i | grep "4444" | awk '{print $2}' | xargs kill -9
+service supervisor stop
+service postgresql stop
+sleep 5
 
 MMUSER_PASSWORD=`< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c\${1:-16};echo;`
 export MMUSER_PASSWORD=$MMUSER_PASSWORD
@@ -23,27 +23,31 @@ export SALT_RESET=$SALT_RESET
 SALT_INVITE=`< /dev/urandom tr -dc A-Z-a-z-0-9 | head -c\${1:-32};echo;`
 export SALT_INVITE=$SALT_INVITE
 
-apt-get install -y postgresql postgresql-contrib
-
+set +e
+service postgresql start
+netstat -lp --protocol=unix | grep postgres
+while [ "$?" != "0" ]
+do
+	service postgresql start
+	sleep 1
+	netstat -lp --protocol=unix | grep postgres
+done
+set -e
 
 su - postgres -c "psql -c \"CREATE DATABASE mattermost;\""
 su - postgres -c "psql -c \"CREATE USER mmuser WITH PASSWORD '$MMUSER_PASSWORD';\""
 su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE mattermost to mmuser;\""
-/etc/init.d/postgresql restart
+service  postgresql restart
 cat /root/mattermost/config/config.json | python -c 'import os, sys, json; js = json.load(sys.stdin); js["ServiceSettings"]["ListenAddress"] = "localhost:4444"; js["SqlSettings"]["DriverName"] = "postgres"; js["SqlSettings"]["DataSource"] = "postgres://mmuser:" + os.environ["MMUSER_PASSWORD"] + "@localhost:5432/mattermost?sslmode=disable&connect_timeout=10"; js["SqlSettings"]["AtRestEncryptKey"] = os.environ["SALT_ATRESTENCRYPTKEY"]; js["FileSettings"]["PublicLinkSalt"] = os.environ["SALT_PUBLICLINK"]; js["EmailSettings"]["InviteSalt"] = os.environ["SALT_INVITE"]; js["EmailSettings"]["PasswordResetSalt"] = os.environ["SALT_RESET"] ; js["EmailSettings"]["FeedbackName"] = "No-Reply"; js["EmailSettings"]["FeedbackEmail"] = "mattermost@scaleway.com"; js["EmailSettings"]["SMTPServer"] = "localhost"; js["EmailSettings"]["SMTPPort"] = "25" ; js["EmailSettings"]["SendEmailNotifications"] = True; js["FileSettings"]["Directory"] = "/mattermost/data/"; print json.dumps(js)' > /root/mattermost/config/new.json
 cat /root/mattermost/config/new.json | python -m json.tool > /root/mattermost/config/config.json
 rm /root/mattermost/config/new.json
 echo "psql_user : mmuser" > /root/.credentials
 echo "psql_password : " $MMUSER_PASSWORD >> /root/.credentials
 chmod 600 /root/.credentials
+
 update-rc.d mattermost disable -f || true
 update-rc.d mattermost remove -f || true
 rm -fr /etc/init.d/mattermost || true
 touch /root/mattermost/done
 
-/etc/init.d/supervisor force-stop
-/etc/init.d/supervisor stop
-lsof -i | grep "4444" | awk '{print $2}' | xargs kill -9
-sleep 1
-/etc/init.d/supervisor start
-rm -fr /var/log/mattermost.log
+service supervisor start

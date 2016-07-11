@@ -1,6 +1,6 @@
 NAME =			mattermost
 VERSION =		latest
-VERSION_ALIASES =	2.1.0 2.1 2
+VERSION_ALIASES =	3.1.0 3.1 3
 TITLE =			mattermost
 DESCRIPTION =		Open source Slack-alternative in Golang and React
 DOC_URL =
@@ -11,7 +11,7 @@ DEFAULT_IMAGE_ARCH =	x86_64
 
 IMAGE_VOLUME_SIZE =	50G
 IMAGE_BOOTSCRIPT =	latest
-IMAGE_NAME =		Mattermost 2
+IMAGE_NAME =		Mattermost 3
 
 
 ## Image tools  (https://github.com/scaleway/image-tools)
