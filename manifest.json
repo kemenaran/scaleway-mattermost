@@ -3,8 +3,6 @@
     "latest": {
       "directory": "4.9.1",
       "architectures": [
-        "arm",
-        "arm64",
         "x86_64"
       ],
       "marketplace-id": "98ad7ccb-cc7f-4828-9da3-113e9c1bd2db"
