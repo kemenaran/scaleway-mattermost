@@ -13,7 +13,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install packages
 RUN apt-get -q update \
- && echo "O" | apt-get -y -q upgrade \
  && apt-get install -y -q \
       nginx-full \
       supervisor \
