@@ -1,12 +1,8 @@
-## -*- docker-image-name: "scaleway/owncloud:latest" -*-
-FROM scaleway/ubuntu:amd64-xenial
-# following 'FROM' lines are used dynamically thanks do the image-builder
-# which dynamically update the Dockerfile if needed.
-#FROM scaleway/ubuntu:armhf-xenial       # arch=armv7l
-#FROM scaleway/ubuntu:arm64-xenial       # arch=arm64
-#FROM scaleway/ubuntu:i386-xenial        # arch=i386
-#FROM scaleway/ubuntu:mips-xenial        # arch=mips
+## -*- docker-image-name: "scaleway/mattermost:latest" -*-
 
+ARG SCW_ARCH
+
+FROM scaleway/ubuntu:${SCW_ARCH}-xenial
 
 MAINTAINER Scaleway <opensource@scaleway.com> (@scaleway)
 
@@ -28,7 +24,7 @@ RUN apt-get -q update \
 
 # Install mattermost
 RUN cd /root/ \
- && wget https://releases.mattermost.com/3.1.0/mattermost-team-3.1.0-linux-amd64.tar.gz -O mattermost.tar.gz \
+ && wget https://releases.mattermost.com/4.9.1/mattermost-team-4.9.1-linux-amd64.tar.gz -O mattermost.tar.gz \
  && tar -xvzf mattermost.tar.gz \
  && rm -fr mattermost.tar.gz \
  && mkdir -p /mattermost/data
